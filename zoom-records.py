@@ -1,11 +1,14 @@
 import os
 import requests
+import calendar
 from datetime import date
 from datetime import datetime
+from datetime import timedelta
 from time import time
 import csv
 import json
 import wget
+
 
 with open("config.json") as json_data_file:
     data = json.load(json_data_file)
@@ -13,7 +16,7 @@ print(data)
 zoom_token = data['zoom-token']
 
 _from_date = '2020-06-01' #raw_input("Please enter start date in format yyyy-mm-dd: ")
-_end_date = '2020-08-01' #raw_input("Please enter end date in format yyyy-mm-dd: ")
+_end_date = '2020-07-02' #raw_input("Please enter end date in format yyyy-mm-dd: ")
 
 
 def get_zoom_users():
@@ -39,14 +42,17 @@ def get_zoom_files(users):
 	for user in users['users']:
 		_url = url + user['id']+'/recordings'
 		from_date = datetime.strptime(_from_date, '%Y-%m-%d').date()  #date(2020, 01, 01)
-		to_date = from_date.replace(month=from_date.month+1)
+		to_date = from_date + timedelta(days=30)
+		if to_date > end_date:
+			to_date = end_date
+
 
 		print('\n::::::::::::::::::::::::::::::'+_url+'::::::::::::::::::::::::::::::')
-		while from_date < end_date:
+		while to_date < end_date+timedelta(days=1):
 			query["from"] = str(from_date)
 			query["to"] = str(to_date)
 
-			print('::::::::::::::::::::::::::::::['+str(from_date)+'] - ['+str(to_date)+']::::::::::::::::::::::::::::::')
+			print(':::::::::::::::::::::::::::::: ['+str(from_date)+'] - ['+str(to_date)+'] ::::::::::::::::::::::::::::::')
 
 			response = requests.request("GET", _url, headers=headers, params=query)
 			json_response = json.loads(response.content)
@@ -55,7 +61,6 @@ def get_zoom_files(users):
 				for meeting in json_response['meetings']:
 					if meeting['recording_count'] > 0:
 						for recording in meeting['recording_files']:
-#							if recording['file_extension'] == 'MP4':
 							item = {}
 							item['username'] = user['first_name'].encode('utf-8')
 							item['recording_start'] = recording['recording_start']
@@ -65,22 +70,15 @@ def get_zoom_files(users):
 							item['topic'] = meeting['topic'].encode('utf-8')
 							item['record_id'] = recording['id']
 							item['meeting_id'] = meeting['id']
+							item['status'] = 'listed'
 							item['file_type'] = 'mp4'
 
-#								print(item['topic'])
 							records_list.append(item)
+			from_date = to_date + timedelta(days=1)
+			to_date = to_date + timedelta(days=30)
 
-			if to_date.month+1 > 12:
-				to_date = to_date.replace(year=to_date.year+1)
-				to_date = to_date.replace(month=1)
-			else:
-				to_date = to_date.replace(month=to_date.month+1)
-
-			if from_date.month+1 > 12:
-				from_date = from_date.replace(year=from_date.year+1)
-				from_date = from_date.replace(month=1)
-			else:
-				from_date = from_date.replace(month=from_date.month+1)
+			if (to_date > end_date) and ((to_date - timedelta(days=30)) != end_date):
+				to_date = end_date
 
 	return records_list
 
@@ -92,20 +90,27 @@ def download_zoom_files(records_list):
 
 		filename = './meetings/'+record['username']+'/'+record['topic']+'/'+ record['download_url'].encode('utf-8').split("/")[-1] +'.'+record['file_type']
 		record['filename']=filename
-		wget.download(record['download_url'],filename)
-		record["status"]="downloaded"
+		try:
+			wget.download(record['download_url'],filename)
+			record["status"]="downloaded"
+		except Exception as e:
+			print('error')
+			record["status"]="listed"
+
 	return records_list
 
 def save_csv(filename, fileobject):
+	print('\n::::::::::::::::::::::::::::::Saving downloaded report::::::::::::::::::::::::::::::')
 	with open(filename, 'w') as f:
 		writer = csv.writer(f)
 		writer.writerow(["RECORDID", "MEETINGID", "TOPIC","FILENAME", "STATUS", "URL","PLAY URL", "START", "END"])
 		for item in fileobject:
 			writer.writerow([item['record_id'], item['meeting_id'], item['topic'], item['filename'], item['status'], item['download_url'], item['play_url'], item['recording_start'], item['recording_end']])
 
+
 csv_file = './records-'+str(time())+'.csv'
 users = get_zoom_users()
 recordings = get_zoom_files(users)
+print(recordings)
 downloaded_records = download_zoom_files(recordings)
 save_csv(csv_file,downloaded_records)
-#print(recordings)
