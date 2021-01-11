@@ -1,2 +1,4 @@
-./recordings
+.DS_Store
+meetings/
 config.json
+records*.csv
