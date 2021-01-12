@@ -1,14 +1,15 @@
 import os
 import requests
 import calendar
+import csv
+import json
+import wget
+import os.path
+from os import path
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
 from time import time
-import csv
-import json
-import wget
-
 
 with open("config.json") as json_data_file:
     data = json.load(json_data_file)
@@ -47,7 +48,7 @@ def get_zoom_files(users):
 			to_date = end_date
 
 
-		print('\n::::::::::::::::::::::::::::::'+_url+'::::::::::::::::::::::::::::::')
+		print('\n::::::::::::::::::::::::::::::'+user['email']+'::::::::::::::::::::::::::::::')
 		while to_date < end_date+timedelta(days=1):
 			query["from"] = str(from_date)
 			query["to"] = str(to_date)
@@ -71,7 +72,7 @@ def get_zoom_files(users):
 							item['record_id'] = recording['id']
 							item['meeting_id'] = meeting['id']
 							item['status'] = 'listed'
-							item['file_type'] = 'mp4'
+							item['file_extension'] = recording['file_extension'].encode('utf-8')
 
 							records_list.append(item)
 			from_date = to_date + timedelta(days=1)
@@ -88,19 +89,24 @@ def download_zoom_files(records_list):
 		if not os.path.exists('./meetings/'+record['username']+'/'+record['topic']):
 			os.makedirs('./meetings/'+record['username']+'/'+record['topic'])
 
-		filename = './meetings/'+record['username']+'/'+record['topic']+'/'+ record['download_url'].encode('utf-8').split("/")[-1] +'.'+record['file_type']
+		filename = './meetings/'+record['username']+'/'+record['topic']+'/'+ datetime.strptime(record['recording_start'], '%Y-%m-%dT%H:%M:%SZ').strftime("GMT%Y%m%d-%H%M%S")+str(index) +'.'+record['file_extension'] #'./meetings/'+record['username']+'/'+record['topic']+'/'+ record['download_url'].encode('utf-8').split("/")[-1] +'.'+record['file_type']
+		print('\n'+filename)
 		record['filename']=filename
+		if (str(path.exists(filename))):
+			print('File already downloaded!')
+			continue
 		try:
 			wget.download(record['download_url'],filename)
 			record["status"]="downloaded"
 		except Exception as e:
-			print('error')
+			print('error ')
+			print(e)
 			record["status"]="listed"
 
 	return records_list
 
 def save_csv(filename, fileobject):
-	print('\n::::::::::::::::::::::::::::::Saving downloaded report::::::::::::::::::::::::::::::')
+	print('\n::::::::::::::::::::::::::::::Saving downloaded report ' + filename +'::::::::::::::::::::::::::::::')
 	with open(filename, 'w') as f:
 		writer = csv.writer(f)
 		writer.writerow(["RECORDID", "MEETINGID", "TOPIC","FILENAME", "STATUS", "URL","PLAY URL", "START", "END"])
@@ -111,6 +117,9 @@ def save_csv(filename, fileobject):
 csv_file = './records-'+str(time())+'.csv'
 users = get_zoom_users()
 recordings = get_zoom_files(users)
-print(recordings)
 downloaded_records = download_zoom_files(recordings)
+
 save_csv(csv_file,downloaded_records)
+save_csv('./records.csv',downloaded_records)
+
+print('Script finished!')
