@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import requests
 import calendar
@@ -16,8 +17,8 @@ with open("config.json") as json_data_file:
 
 zoom_token = data['zoom-token']
 
-start_date = '2020-06-01' #raw_input("Please enter start date in format yyyy-mm-dd: ")
-end_date = '2020-07-02' #raw_input("Please enter end date in format yyyy-mm-dd: ")
+start_date = '2020-06-01' #raw_input("Please let me know the start date in format yyyy-mm-dd: ")
+end_date = '2020-07-02' #raw_input("Please let me know the end date in format yyyy-mm-dd: ")
 
 def get_zoom_users():
 	print('::::::::::::::::::::::::::::::Fetching user ids::::::::::::::::::::::::::::::')
@@ -74,6 +75,9 @@ def get_zoom_files(users):
 							item['status'] = 'listed'
 							item['file_size'] = recording['file_size']
 							item['file_extension'] = recording['file_extension'].encode('utf-8')
+							item['vimeo_uri']=''
+							item['vimeo_status']='pending'
+							item['vimeo_transcode_status']='pending'
 
 							records_list.append(item)
 			from_date = to_date + timedelta(days=1)
@@ -84,46 +88,62 @@ def get_zoom_files(users):
 
 	return records_list
 
-def download_zoom_files(records_list):
+def download_zoom_files(records_list, filename):
 	print('\n::::::::::::::::::::::::::::::Downloading meetings files::::::::::::::::::::::::::::::')
-	for index, record in enumerate(records_list):
-		if not os.path.exists('./meetings/'+record['username']+'/'+record['topic']):
-			os.makedirs('./meetings/'+record['username']+'/'+record['topic'])
+	file_exists = os.path.isfile(filename)
 
-		filepath= './meetings/'+record['username']+'/'+record['topic']+'/'
-		filename = datetime.strptime(record['recording_start'], '%Y-%m-%dT%H:%M:%SZ').strftime("GMT%Y%m%d-%H%M%S")+str(index) +'.'+record['file_extension']
-		print('\n'+filepath+filename)
-		record['file_path']=filepath
-		record['file_name']=filename
-		if (path.exists(filepath+filename)):
-			print('File already downloaded!')
-			record["status"]="downloaded"
-			continue
-		try:
-			wget.download(record['download_url'],filepath+filename)
-			record["status"]="downloaded"
-		except Exception as e:
-			print(e)
-			if record["status"] != "downloaded":
-				record["status"]="listed"
+	with open(filename, 'a') as f:
+		writer = csv.writer(f)
+
+		if not file_exists:
+			writer.writerow(["EMAIL","RECORDID", "MEETINGID", "TOPIC","FILE NAME", "STATUS", "URL","PLAY URL", "START", "END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS"])
+
+		for index, record in enumerate(records_list):
+			if not os.path.exists('./meetings/'+record['username']+'/'+record['topic']):
+				os.makedirs('./meetings/'+record['username']+'/'+record['topic'])
+
+			filepath= './meetings/'+record['username']+'/'+record['topic']+'/'
+			filename = datetime.strptime(record['recording_start'], '%Y-%m-%dT%H:%M:%SZ').strftime("GMT%Y%m%d-%H%M%S")+str(index) +'.'+record['file_extension']
+			record['file_path']=filepath
+			record['file_name']=filename
+
+			print('\n'+filepath+filename)
+
+			if (path.exists(filepath+filename)):
+				print('File already downloaded!')
+				record["status"]="downloaded"
+				writer.writerow([record['email'],record['record_id'], record['meeting_id'], record['topic'], record['file_name'], record['status'], record['download_url'], record['play_url'], record['recording_start'], record['recording_end'], record['file_path'], record['file_size'], record['file_extension'], record['vimeo_status'], record['vimeo_uri'], record['vimeo_transcode_status']])
+				continue
+			try:
+				wget.download(record['download_url'],filepath+filename)
+				record["status"]="downloaded"
+				writer.writerow([record['email'],record['record_id'], record['meeting_id'], record['topic'], record['file_name'], record['status'], record['download_url'], record['play_url'], record['recording_start'], record['recording_end'], record['file_path'], record['file_size'], record['file_extension'], record['vimeo_status'], record['vimeo_uri'], record['vimeo_transcode_status']])
+			except Exception as e:
+				print(e)
+				if record["status"] != "downloaded":
+					record["status"]="listed"
+					writer.writerow([record['email'],record['record_id'], record['meeting_id'], record['topic'], record['file_name'], record['status'], record['download_url'], record['play_url'], record['recording_start'], record['recording_end'], record['file_path'], record['file_size'], record['file_extension'], record['vimeo_status'], record['vimeo_uri'], record['vimeo_transcode_status']])
 
 	return records_list
 
-def save_csv(filename, fileobject):
+def save_csv(fileobject, filename):
 	print('\n::::::::::::::::::::::::::::::Saving downloaded report ' + filename +'::::::::::::::::::::::::::::::')
-	with open(filename, 'w') as f:
+	#Checking if file exists
+	file_exists = os.path.isfile(filename)
+	with open(filename, 'a') as f:
 		writer = csv.writer(f)
-		writer.writerow(["EMAIL","RECORDID", "MEETINGID", "TOPIC","FILE NAME", "STATUS", "URL","PLAY URL", "START", "END","FILE PATH", "FILE SIZE", "FILE EXTENSION"])
-		for item in fileobject:
-			writer.writerow([item['email'],item['record_id'], item['meeting_id'], item['topic'], item['file_name'], item['status'], item['download_url'], item['play_url'], item['recording_start'], item['recording_end'], item['file_path'], item['file_size'], item['file_extension']])
+		if not file_exists:
+			writer.writerow(["EMAIL","RECORDID", "MEETINGID", "TOPIC","FILE NAME", "STATUS", "URL","PLAY URL", "START", "END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS"])
+		for record in fileobject:
+			writer.writerow([record['email'],record['record_id'], record['meeting_id'], record['topic'], record['file_name'], record['status'], record['download_url'], record['play_url'], record['recording_start'], record['recording_end'], record['file_path'], record['file_size'], record['file_extension'], record['vimeo_status'], record['vimeo_uri'], record['vimeo_transcode_status']])
 
 
 csv_file = './records-'+str(time())+'.csv'
 users = get_zoom_users()
 recordings = get_zoom_files(users)
-downloaded_records = download_zoom_files(recordings)
+downloaded_records = download_zoom_files(recordings, './records.csv')
 
-save_csv(csv_file,downloaded_records)
-save_csv('./records.csv',downloaded_records)
+save_csv(downloaded_records, csv_file)
+#save_csv('./records.csv',downloaded_records)
 
 print('Script finished!')
