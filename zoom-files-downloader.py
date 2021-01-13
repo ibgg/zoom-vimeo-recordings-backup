@@ -19,7 +19,6 @@ zoom_token = data['zoom-token']
 start_date = '2020-06-01' #raw_input("Please enter start date in format yyyy-mm-dd: ")
 end_date = '2020-07-02' #raw_input("Please enter end date in format yyyy-mm-dd: ")
 
-
 def get_zoom_users():
 	print('::::::::::::::::::::::::::::::Fetching user ids::::::::::::::::::::::::::::::')
 
@@ -94,18 +93,19 @@ def download_zoom_files(records_list):
 		filepath= './meetings/'+record['username']+'/'+record['topic']+'/'
 		filename = datetime.strptime(record['recording_start'], '%Y-%m-%dT%H:%M:%SZ').strftime("GMT%Y%m%d-%H%M%S")+str(index) +'.'+record['file_extension']
 		print('\n'+filepath+filename)
-		record['filepath']=filepath
-		record['filename']=filename
-		if (str(path.exists(filename))):
+		record['file_path']=filepath
+		record['file_name']=filename
+		if (path.exists(filepath+filename)):
 			print('File already downloaded!')
+			record["status"]="downloaded"
 			continue
 		try:
 			wget.download(record['download_url'],filepath+filename)
 			record["status"]="downloaded"
 		except Exception as e:
-			print('error ')
 			print(e)
-			record["status"]="listed"
+			if record["status"] != "downloaded":
+				record["status"]="listed"
 
 	return records_list
 
@@ -113,9 +113,9 @@ def save_csv(filename, fileobject):
 	print('\n::::::::::::::::::::::::::::::Saving downloaded report ' + filename +'::::::::::::::::::::::::::::::')
 	with open(filename, 'w') as f:
 		writer = csv.writer(f)
-		writer.writerow(["EMAIL","RECORDID", "MEETINGID", "TOPIC","FILENAME", "STATUS", "URL","PLAY URL", "START", "END","FILE PATH", "FILE SIZE", "FILE EXTENSION"])
+		writer.writerow(["EMAIL","RECORDID", "MEETINGID", "TOPIC","FILE NAME", "STATUS", "URL","PLAY URL", "START", "END","FILE PATH", "FILE SIZE", "FILE EXTENSION"])
 		for item in fileobject:
-			writer.writerow([item['email'],item['record_id'], item['meeting_id'], item['topic'], item['filename'], item['status'], item['download_url'], item['play_url'], item['recording_start'], item['recording_end'], item['filepath'], item['file_size'], item['file_extension']])
+			writer.writerow([item['email'],item['record_id'], item['meeting_id'], item['topic'], item['file_name'], item['status'], item['download_url'], item['play_url'], item['recording_start'], item['recording_end'], item['file_path'], item['file_size'], item['file_extension']])
 
 
 csv_file = './records-'+str(time())+'.csv'
