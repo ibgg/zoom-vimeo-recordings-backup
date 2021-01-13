@@ -72,31 +72,36 @@ def check_upload_videos(records):
 	print('\n::::::::::::::::::::::::::::::Checking video status from Vimeo::::::::::::::::::::::::::::::')
 	headers = headers = {'authorization': 'Bearer '+vimeo_token}
 
-	for record in records:
-		print('\n::::::::::::::::::::::::::::::checking %s::::::::::::::::::::::::::::::'%record['file_name'])
-		url = "https://api.vimeo.com/me/"+record['vimeo_uri']
-		if record['vimeo_status']!='transcoding' and record['vimeo_status']!='error' and record['vimeo_uri'] !='':
-			response = requests.get(url, headers=headers)
-			json_response = json.loads(response.text)
-			print(json_response['status'])
+	with open('./records.csv', mode='w') as f:
+		writer = csv.writer(f)
+		writer.writerow(["EMAIL","RECORDID", "MEETINGID", "TOPIC","FILE NAME", "STATUS", "URL","PLAY URL", "START", "END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS"])
 
-			record['vimeo_status'] = json_response['status']
-			if record['status'] == 'available' or record['status'] == 'transcoding':
-				if record['status'] == 'available':
-					print ('Available %s video!',%record['filename'])
+		for record in records:
+			if record['vimeo_status']!='available' and record['vimeo_status']!='error' and record['vimeo_uri'] !='':
+				url = "https://api.vimeo.com/me/"+record['vimeo_uri']
+				print('\n::::::::::::::::::::::::::::::checking %s::::::::::::::::::::::::::::::'%record['file_name'])
+				response = requests.get(url, headers=headers)
+				json_response = json.loads(response.text)
+
+				record['vimeo_status'] = json_response['status']
+				if record['vimeo_status'] == 'available' or record['vimeo_status'] == 'transcoding':
+					if record['vimeo_status'] == 'available':
+						print ('Available %s video!' %record['file_name'])
+					else:
+						print ('Transcoding video %s... almost ready' %record['file_name'])
+				elif record['vimeo_status'] != 'error':
+					print('Not yet avaiable video ' + record['file_name']+' lets try in ' +str(fibo(START_WAIT))+' seconds')
+					unavailablecount += 1
 				else:
-					print ('Transcoding video %s... almost ready' %record['file_name'])
-			elif json_response['vimeo_status'] != 'error':
-				print('Not yet avaiable video ' + record['file_name']+' lets try in ' +str(fibo(START_WAIT))+' seconds')
-				unavailablecount += 1
-			else:
-				print('Error status for file %s' %record['file_name'] )
+					print('Error status for video %s' %record['file_name'] )
 
-	if unavailablecount > 0:
-		sleep(fibo(START_WAIT))
-		START_WAIT +=1
-		check_upload_videos(records)
-		#threading.Thread(target=check_upload_videos, args=[records]).start()
+			writer.writerow([record['email'],record['record_id'], record['meeting_id'], record['topic'], record['file_name'], record['status'], record['download_url'], record['play_url'], record['recording_start'], record['recording_end'], record['file_path'], record['file_size'], record['file_extension'], record['vimeo_status'], record['vimeo_uri'], record['vimeo_transcode_status']])
+
+		if unavailablecount > 0:
+			sleep(fibo(START_WAIT))
+			START_WAIT +=1
+			check_upload_videos(records)
+			#threading.Thread(target=check_upload_videos, args=[records]).start()
 
 	return records
 
@@ -107,8 +112,8 @@ def upload_zoom_videos(records):
 	headers = headers = {'authorization': 'Bearer '+vimeo_token}
 
 	for record in records:
-		print('\n::::::::::::::::::::::::::::::uploading %s::::::::::::::::::::::::::::::'%record['file_name'])
-		if record['vimeo_status'] != 'avaiable':
+		if record['vimeo_status'] != 'available' and record['vimeo_status'] != 'transcoding' and record['vimeo_status'] != 'transcode_starting':
+			print('\n::::::::::::::::::::::::::::::uploading %s::::::::::::::::::::::::::::::'%record['file_name'])
 			body = {}
 			body['name']=record['file_name']
 			body['description']=VIDEO_DESCRIPTION.format(topic=record['topic'],start_date=record['recording_start'])
@@ -136,18 +141,12 @@ def upload_zoom_videos(records):
 				record['vimeo_status'] = json_response['upload']['status']
 				record['vimeo_transcode_status'] = json_response['transcode']['status']
 		else:
-			print('\n::::::::::::::::::::::::::::::record %s already uploaded!::::::::::::::::::::::::::::::'%record['file_name'])
+			print('\n::::::::::::::::::::::::::::::record %s already or almost uploaded!::::::::::::::::::::::::::::::'%record['file_name'])
 
 	return records
 
 records = load_videos()
-#records[0]['vimeo_uri']='/videos/499840153'
-#records[0]['vimeo_status']='in_progress'
 records = check_upload_videos(records)
 records = upload_zoom_videos(records)
 records = check_upload_videos(records)
-print(records)
-#upload_local_videos(records)
-#upload_zoom_videos(records)
 #print(records)
-#print(records_list)
