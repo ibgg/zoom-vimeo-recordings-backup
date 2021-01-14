@@ -33,17 +33,18 @@ def fibo(n):
 		return(fibo(n-1) + fibo(n-2))
 
 # Loading json files
-def load_videos():
+def load_videos_data(filename):
 	print('\n::::::::::::::::::::::::::::::Loading meetings files::::::::::::::::::::::::::::::')
 	records_list = []
-	csvfile = open('records.csv', 'r')
-	fieldnames = ("EMAIL","RECORDID", "MEETINGID", "TOPIC","FILE NAME", "STATUS", "URL","PLAY URL", "START", "END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS")
+	csvfile = open(filename, 'r')
+	fieldnames = ("EMAIL","RECORDID", "MEETINGID","MEETINGUUID", "TOPIC","FILE NAME", "STATUS", "URL","PLAY URL", "START", "END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS")
 	reader = csv.DictReader( csvfile, fieldnames)
 	for index, row in enumerate(reader):
 		if index > 0 and row['FILE EXTENSION'] == 'MP4':
 			item = {}
 			item['record_id'] = row['RECORDID']
 			item['meeting_id'] = row['MEETINGID']
+			item['meeting_uuid'] = row['MEETINGUUID']
 			item['status']=row['STATUS']
 			item['download_url']=row['URL']
 			item['play_url']=row['PLAY URL']
@@ -74,7 +75,7 @@ def check_upload_videos(records):
 
 	with open('./records.csv', mode='w') as f:
 		writer = csv.writer(f)
-		writer.writerow(["EMAIL","RECORDID", "MEETINGID", "TOPIC","FILE NAME", "STATUS", "URL","PLAY URL", "START", "END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS"])
+		writer.writerow(["EMAIL","RECORDID", "MEETINGID","MEETINGUUID", "TOPIC","FILE NAME", "STATUS", "URL","PLAY URL", "START", "END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS"])
 
 		for record in records:
 			if record['vimeo_status']!='available' and record['vimeo_status']!='error' and record['vimeo_uri'] !='':
@@ -85,17 +86,18 @@ def check_upload_videos(records):
 
 				record['vimeo_status'] = json_response['status']
 				if record['vimeo_status'] == 'available' or record['vimeo_status'] == 'transcoding':
+					#print(json_response)
 					if record['vimeo_status'] == 'available':
 						print ('Available %s video!' %record['file_name'])
 					else:
 						print ('Transcoding video %s... almost ready' %record['file_name'])
 				elif record['vimeo_status'] != 'error':
-					print('Not yet avaiable video ' + record['file_name']+' lets try in ' +str(fibo(START_WAIT))+' seconds')
+					print('Not yet available video ' + record['file_name']+' lets try in ' +str(fibo(START_WAIT))+' seconds')
 					unavailablecount += 1
 				else:
 					print('Error status for video %s' %record['file_name'] )
 
-			writer.writerow([record['email'],record['record_id'], record['meeting_id'], record['topic'], record['file_name'], record['status'], record['download_url'], record['play_url'], record['recording_start'], record['recording_end'], record['file_path'], record['file_size'], record['file_extension'], record['vimeo_status'], record['vimeo_uri'], record['vimeo_transcode_status']])
+			writer.writerow([record['email'],record['record_id'], record['meeting_id'], record['meeting_uuid'], record['topic'], record['file_name'], record['status'], record['download_url'], record['play_url'], record['recording_start'], record['recording_end'], record['file_path'], record['file_size'], record['file_extension'], record['vimeo_status'], record['vimeo_uri'], record['vimeo_transcode_status']])
 
 		if unavailablecount > 0:
 			sleep(fibo(START_WAIT))
@@ -145,7 +147,7 @@ def upload_zoom_videos(records):
 
 	return records
 
-records = load_videos()
+records = load_videos_data('records.csv')
 records = check_upload_videos(records)
 records = upload_zoom_videos(records)
 records = check_upload_videos(records)
