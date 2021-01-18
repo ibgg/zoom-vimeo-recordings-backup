@@ -67,6 +67,9 @@ def upload_local_videos(records):
 	for record in records:
 		print('\n::::::::::::::::::::::::::::::uploading %s::::::::::::::::::::::::::::::'%record["file_name"]	)
 
+def set_embeded_settings(records):
+	print('\n::::::::::::::::::::::::::::::Setting embedded settings::::::::::::::::::::::::::::::')
+
 def check_upload_videos(records):
 	global START_WAIT
 	unavailablecount = 0

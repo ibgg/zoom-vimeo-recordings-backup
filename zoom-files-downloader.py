@@ -17,8 +17,8 @@ with open("config.json") as json_data_file:
 
 zoom_token = data['zoom-token']
 
-start_date = '2020-09-01' #raw_input("Please let me know the start date in format yyyy-mm-dd: ")
-end_date = '2020-10-01' #raw_input("Please let me know the end date in format yyyy-mm-dd: ")
+start_date = '2021-01-01' #raw_input("Please let me know the start date in format yyyy-mm-dd: ")
+end_date = '2021-01-16' #raw_input("Please let me know the end date in format yyyy-mm-dd: ")
 
 def get_zoom_users():
 	print('::::::::::::::::::::::::::::::Fetching user ids::::::::::::::::::::::::::::::')
@@ -32,6 +32,7 @@ def get_zoom_users():
 	return users
 
 def get_zoom_files(users):
+	#print(users)
 	print('\n::::::::::::::::::::::::::::::Downloading meetings list::::::::::::::::::::::::::::::')
 
 	url = "https://api.zoom.us/v2/users/"
