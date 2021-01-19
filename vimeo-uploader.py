@@ -20,11 +20,13 @@ from time import sleep
 #constants
 START_WAIT = 7
 VIDEO_DESCRIPTION = 'Video de sesión de: {topic}, al {start_date}'
-CSV_HEADER = ["EMAIL","RECORD ID", "MEETING ID","MEETING UUID", "TOPIC","FILE NAME", "STATUS", "DOWNLOAD URL","PLAY URL", "RECORDING START", "RECORDING END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO ID", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS"]
+CSV_HEADER = ["EMAIL","RECORD ID", "MEETING ID","MEETING UUID", "TOPIC","FILE NAME", "STATUS", "DOWNLOAD URL","PLAY URL", "RECORDING START", "RECORDING END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO ID", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS", "VIMEO EMBEDDED"]
 # Getting vimeo token
 with open("config.json") as json_data_file:
     data = json.load(json_data_file)
 vimeo_token = data['vimeo-token']
+vimeo_userid= data['vimeo-user-id']
+vimeo_preset_id=data["vimeo-preset-id"]
 
 def fibo(n):
 	if n <= 1:
@@ -52,9 +54,19 @@ def upload_local_videos(records):
 	for record in records:
 		print('\n::::::::::::::::::::::::::::::uploading %s::::::::::::::::::::::::::::::'%record["file_name"]	)
 
-## TODO:
-def set_embeded_settings(records):
+def set_embeded_presets(record):
 	print('\n::::::::::::::::::::::::::::::Setting embedded settings::::::::::::::::::::::::::::::')
+	headers = headers = {'authorization': 'Bearer '+vimeo_token}
+	url = 'https://api.vimeo.com/videos/{video_id}/presets/{preset_id}'.format(video_id=record['vimeo_id'], preset_id=vimeo_preset_id)
+
+	response = requests.put(url, headers=headers)
+
+	print(response)
+
+	if response.status_code == 204:
+		record['vimeo_embedded'] = True
+
+	return record
 
 def get_record_row(record):
 	row = []
@@ -82,11 +94,18 @@ def check_upload_videos(records):
 				record['vimeo_status'] = json_response['status']
 				if record['vimeo_status'] == 'available' or record['vimeo_status'] == 'transcoding':
 					#print(json_response)
+					if record['vimeo_embedded'] == 'False':
+						record = set_embeded_presets(record)
+
 					if record['vimeo_status'] == 'available':
 						print ('Available %s video!' %record['file_name'])
 					else:
 						print ('Transcoding video %s... almost ready' %record['file_name'])
+
 				elif record['vimeo_status'] != 'error':
+					if record['vimeo_embedded'] == 'False':
+						record = set_embeded_presets(record)
+
 					print('Not yet available video ' + record['file_name']+' lets try in ' +str(fibo(START_WAIT))+' seconds')
 					unavailablecount += 1
 				else:
@@ -132,7 +151,7 @@ def upload_zoom_videos(records):
 
 			if response.status_code == 201:
 				json_response = json.loads(response.content)
-				print(json_response)
+				#print(json_response)
 				record['vimeo_uri'] = json_response['uri']
 				record['vimeo_status'] = json_response['upload']['status']
 				record['vimeo_transcode_status'] = json_response['transcode']['status']
@@ -143,7 +162,7 @@ def upload_zoom_videos(records):
 	return records
 
 records = load_videos_data('records.csv')
-#records = check_upload_videos(records)
-#records = upload_zoom_videos(records)
-#records = check_upload_videos(records)
+records = check_upload_videos(records)
+records = upload_zoom_videos(records)
+records = check_upload_videos(records)
 #print(records)
