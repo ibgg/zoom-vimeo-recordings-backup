@@ -18,6 +18,8 @@ from datetime import timedelta
 from time import time
 from time import sleep
 
+CSV_HEADER = ["EMAIL","RECORD ID", "MEETING ID","MEETING UUID", "TOPIC","FILE NAME", "STATUS", "DOWNLOAD URL","PLAY URL", "RECORDING START", "RECORDING END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO ID", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS"]
+
 with open("config.json") as json_data_file:
     data = json.load(json_data_file)
 zoom_token = data['zoom-token']
@@ -25,32 +27,16 @@ zoom_token = data['zoom-token']
 # Loading json files
 def load_videos_data(filename):
 	print('\n::::::::::::::::::::::::::::::Loading meetings files::::::::::::::::::::::::::::::')
-	records_list = []
+	records = []
 	csvfile = open(filename, 'r')
-	fieldnames = ("EMAIL","RECORDID", "MEETINGID","MEETINGUUID", "TOPIC","FILE NAME", "STATUS", "URL","PLAY URL", "START", "END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS")
-	reader = csv.DictReader( csvfile, fieldnames)
+	reader = csv.DictReader( csvfile, CSV_HEADER)
 	for index, row in enumerate(reader):
-		if index > 0:
+		if index > 0 and row['FILE EXTENSION'] == 'MP4':
 			item = {}
-			item['record_id'] = row['RECORDID']
-			item['meeting_id'] = row['MEETINGID']
-			item['meeting_uuid'] = row['MEETINGUUID']
-			item['status']=row['STATUS']
-			item['download_url']=row['URL']
-			item['play_url']=row['PLAY URL']
-			item['topic']=row['TOPIC']
-			item['recording_start'] = row['START']
-			item['recording_end'] = row['END']
-			item['file_path']=row['FILE PATH']
-			item['file_name']=row['FILE NAME']
-			item['email']=row['EMAIL']
-			item['file_size']=row['FILE SIZE']
-			item['file_extension'] = row['FILE EXTENSION']
-			item['vimeo_status']=row['VIMEO STATUS']
-			item['vimeo_uri']=row['VIMEO URI']
-			item['vimeo_transcode_status']=row['VIMEO TRANSCODE STATUS']
-			records_list.append(item)
-	return records_list
+			for record_name in CSV_HEADER:
+				item[record_name.lower().replace(' ','_')] = row[record_name]
+			records.append(item)
+	return records
 
 def delete_zoom_files(records):
 
