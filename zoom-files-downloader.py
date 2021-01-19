@@ -85,6 +85,7 @@ def get_zoom_files(users):
 							item['vimeo_transcode_status']='pending'
 
 							records_list.append(item)
+
 			from_date = to_date + timedelta(days=1)
 			to_date = to_date + timedelta(days=30)
 
@@ -94,7 +95,10 @@ def get_zoom_files(users):
 	return records_list
 
 def get_record_row(record):
-	return [record['email'],record['record_id'], record['meeting_id'], record['meeting_uuid'], record['topic'], record['file_name'], record['status'], record['download_url'], record['play_url'], record['recording_start'], record['recording_end'], record['file_path'], record['file_size'], record['file_extension'], record['vimeo_id'], record['vimeo_status'], record['vimeo_uri'], record['vimeo_transcode_status']]
+	row = []
+	for record_name in CSV_HEADER:
+		row.append(record[record_name.lower().replace(' ','_')])
+	return row
 
 def download_zoom_files(records_list, filename):
 	print('\n::::::::::::::::::::::::::::::Downloading meetings files::::::::::::::::::::::::::::::')

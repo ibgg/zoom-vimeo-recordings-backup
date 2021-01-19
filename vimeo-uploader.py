@@ -52,12 +52,15 @@ def upload_local_videos(records):
 	for record in records:
 		print('\n::::::::::::::::::::::::::::::uploading %s::::::::::::::::::::::::::::::'%record["file_name"]	)
 
+## TODO:
 def set_embeded_settings(records):
 	print('\n::::::::::::::::::::::::::::::Setting embedded settings::::::::::::::::::::::::::::::')
 
-## TODO:
 def get_record_row(record):
-	return [record['email'],record['record_id'], record['meeting_id'], record['meeting_uuid'], record['topic'], record['file_name'], record['status'], record['download_url'], record['play_url'], record['recording_start'], record['recording_end'], record['file_path'], record['file_size'], record['file_extension'], record['vimeo_status'], record['vimeo_uri'], record['vimeo_transcode_status']]
+	row = []
+	for record_name in CSV_HEADER:
+		row.append(record[record_name.lower().replace(' ','_')])
+	return row
 
 def check_upload_videos(records):
 	global START_WAIT
@@ -133,13 +136,13 @@ def upload_zoom_videos(records):
 				record['vimeo_uri'] = json_response['uri']
 				record['vimeo_status'] = json_response['upload']['status']
 				record['vimeo_transcode_status'] = json_response['transcode']['status']
+				record['vimeo_id']= record['vimeo_uri'][8:len(record['vimeo_uri'])]
 		else:
 			print('\n::::::::::::::::::::::::::::::record %s already or almost uploaded!::::::::::::::::::::::::::::::'%record['file_name'])
 
 	return records
 
 records = load_videos_data('records.csv')
-print(records)
 #records = check_upload_videos(records)
 #records = upload_zoom_videos(records)
 #records = check_upload_videos(records)
