@@ -12,7 +12,7 @@ from datetime import datetime
 from datetime import timedelta
 from time import time
 
-CSV_HEADER = ["EMAIL","RECORD ID", "MEETING ID","MEETING UUID", "TOPIC","FILE NAME", "STATUS", "DOWNLOAD URL","PLAY URL", "RECORDING START", "RECORDING END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO ID", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS", "VIMEO EMBEDDED"]
+CSV_HEADER = ["EMAIL","RECORD ID", "MEETING ID","MEETING UUID", "TOPIC","FILE NAME", "STATUS", "DOWNLOAD URL","PLAY URL", "RECORDING START", "RECORDING END","FILE PATH", "FILE SIZE", "FILE EXTENSION", "VIMEO ID", "VIMEO STATUS", "VIMEO URI", "VIMEO TRANSCODE STATUS", "VIMEO EMBEDDED", "VIMEO FOLDER"]
 
 with open("config.json") as json_data_file:
     data = json.load(json_data_file)
@@ -84,6 +84,7 @@ def get_zoom_files(users):
 							item['vimeo_status']='pending'
 							item['vimeo_transcode_status']='pending'
 							item['vimeo_embedded'] = False
+							item['vimeo_folder']=item['topic'][0:31]
 
 							records_list.append(item)
 
