@@ -45,7 +45,7 @@ def delete_zoom_files(records):
 
 	for record in records:
 		url = "https://api.zoom.us/v2/meetings/{meeting_id}/recordings/{record_id}"
-		url=url.format( meeting_id=urllib.quote_plus(record['meeting_uuid']),record_id=urllib.quote_plus(record['record_id']) )
+		url=url.format( meeting_id=urllib.parse.quote(record['meeting_uuid']),record_id=urllib.parse.quote(record['record_id']) )
 		print(url)
 
 		if record['status']=='downloaded' or record['vimeo_status']=='available':
@@ -58,6 +58,6 @@ def delete_zoom_files(records):
 
 	return records
 
-records = load_videos_data('records_zoom.csv')
+records = load_videos_data('zoom-files.csv')
 #print (records)
 records = delete_zoom_files(records)
