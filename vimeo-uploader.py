@@ -83,9 +83,9 @@ def get_vimeo_folders():
 	response = requests.get(url, headers=headers)
 	json_response = json.loads(response.content)
 
-	if (json_response['data'] > 0):
+	if (json_response['total'] > 0):
 		for record in json_response['data']:
-			folders[record['name'].encode('utf-8')] = record['uri'][record['uri'].rindex('/')+1:len(record['uri'])]
+			folders[record['name']] = record['uri'][record['uri'].rindex('/')+1:len(record['uri'])]
 
 	return folders
 
@@ -96,14 +96,12 @@ def request_move_videos_to_folder(videos_list, record, folder_id):
 	videos_str = ','.join(videos_list[record])
 	query = {'uris':videos_str}
 	url = url.format(user_id=vimeo_userid, project_id=folder_id)
-	print(url)
-	print(query)
 	response = requests.put(url, headers=headers, params=query)
 
 	if response.status_code != 204:
-		print('NOT moved videos ' + videos_str)
+		print('Error trying to move videos videos {videos} to folder {folder}'.format(videos=videos_str, folder=record))
 	else:
-		print('MOVED VIDEOS')
+		print('Moved videos {videos} to folder {folder}'.format(videos=videos_list[record], folder=record))
 
 
 def move_videos_to_folder(records):
@@ -115,9 +113,6 @@ def move_videos_to_folder(records):
 		if record['vimeo_folder'] not in videos_list:
 			videos_list[record['vimeo_folder'].rstrip()] = []
 		videos_list[record['vimeo_folder'].rstrip()].append(record['vimeo_uri'])
-
-	print(folders)
-	print(videos_list)
 
 	# Looking for the specified folder in vimeo
 	for record in videos_list:

@@ -66,19 +66,19 @@ def get_zoom_files(users):
 					if meeting['recording_count'] > 0:
 						for recording in meeting['recording_files']:
 							item = {}
-							item['username'] = user['first_name'].encode('utf-8')
+							item['username'] = user['first_name']
 							item['email'] = user['email']
 							item['recording_start'] = recording['recording_start']
 							item['recording_end'] = recording['recording_end']
-							item['download_url'] = recording['download_url'].encode('utf-8')
-							item['play_url'] = recording['play_url'].encode('utf-8')
-							item['topic'] = meeting['topic'].encode('utf-8')
+							item['download_url'] = recording['download_url']
+							item['play_url'] = recording['play_url']
+							item['topic'] = meeting['topic']
 							item['record_id'] = recording['id']
 							item['meeting_id'] = meeting['id']
 							item['meeting_uuid']=recording['meeting_id']
 							item['status'] = 'listed'
 							item['file_size'] = recording['file_size']
-							item['file_extension'] = recording['file_extension'].encode('utf-8')
+							item['file_extension'] = recording['file_extension']
 							item['vimeo_id']=''
 							item['vimeo_uri']=''
 							item['vimeo_status']='pending'
@@ -113,13 +113,14 @@ def download_zoom_files(records_list, filename):
 			writer.writerow(CSV_HEADER)
 
 		for index, record in enumerate(records_list):
-			if not os.path.exists('./meetings/'+record['username']+'/'+record['topic']):
-				os.makedirs('./meetings/'+record['username']+'/'+record['topic'])
+			filepath = './meetings/{username}/{topic}/'.format(username=record['username'],topic=record['topic'])
+			if not os.path.exists(str(filepath)):
+				os.makedirs(str(filepath))
 
-			filepath= './meetings/'+record['username']+'/'+record['topic']+'/'
-			filename = datetime.strptime(record['recording_start'], '%Y-%m-%dT%H:%M:%SZ').strftime("GMT%Y%m%d-%H%M%S")+str(index) +'.'+record['file_extension']
-			record['file_path']=filepath
-			record['file_name']=filename
+			#filepath= './meetings/'+record['username']+'/'+record['topic']+'/'
+			filename = datetime.strptime(record['recording_start'], '%Y-%m-%dT%H:%M:%SZ').strftime("GMT%Y%m%d-%H%M%S")+str(index) +'.'+str(record['file_extension'])
+			record['file_path']=str(filepath)
+			record['file_name']=str(filename)
 
 			print('\n'+filepath+filename)
 
@@ -129,14 +130,14 @@ def download_zoom_files(records_list, filename):
 				writer.writerow(get_record_row(record))
 				continue
 			try:
-				wget.download(record['download_url'],filepath+filename)
+				wget.download(str(record['download_url']),str(filepath+filename))
 				record["status"]="downloaded"
 				writer.writerow(get_record_row(record))
 			except Exception as e:
 				print(e)
 				if record["status"] != "downloaded":
 					record["status"]="listed"
-					writer.writerow(get_record_row)
+					writer.writerow(get_record_row(record))
 
 	return records_list
 
