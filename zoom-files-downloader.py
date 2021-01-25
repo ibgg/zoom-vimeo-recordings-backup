@@ -6,6 +6,7 @@ import csv
 import json
 import wget
 import os.path
+import urllib.parse
 from os import path
 from datetime import date
 from datetime import datetime
@@ -19,8 +20,8 @@ with open("config.json") as json_data_file:
 
 zoom_token = data['zoom-token']
 
-start_date = '2020-08-09' #raw_input("Please let me know the start date in format yyyy-mm-dd: ")
-end_date = '2020-08-09' #raw_input("Please let me know the end date in format yyyy-mm-dd: ")
+start_date = '2021-01-18' #raw_input("Please let me know the start date in format yyyy-mm-dd: ")
+end_date = '2021-01-24' #raw_input("Please let me know the end date in format yyyy-mm-dd: ")
 
 def get_zoom_users():
 	print('::::::::::::::::::::::::::::::Fetching user ids::::::::::::::::::::::::::::::')
@@ -70,7 +71,7 @@ def get_zoom_files(users):
 							item['email'] = user['email']
 							item['recording_start'] = recording['recording_start']
 							item['recording_end'] = recording['recording_end']
-							item['download_url'] = recording['download_url']
+							item['download_url'] = recording['download_url'] #urllib.parse.quote(recording['download_url'])
 							item['play_url'] = recording['play_url']
 							item['topic'] = meeting['topic']
 							item['record_id'] = recording['id']
@@ -130,9 +131,11 @@ def download_zoom_files(records_list, filename):
 				writer.writerow(get_record_row(record))
 				continue
 			try:
+				print('Lets download '+ str(record['download_url']))
 				wget.download(str(record['download_url']),str(filepath+filename))
 				record["status"]="downloaded"
 				writer.writerow(get_record_row(record))
+				print('\n...downloaded')
 			except Exception as e:
 				print(e)
 				if record["status"] != "downloaded":
