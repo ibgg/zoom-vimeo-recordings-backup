@@ -79,13 +79,23 @@ def get_vimeo_folders():
 	headers = headers = {'authorization': 'Bearer '+vimeo_token}
 	url = 'https://api.vimeo.com/users/{user_id}/projects'.format(user_id=vimeo_userid)
 	folders = {}
+	folders_counter = 0
+	counter = 1
 
-	response = requests.get(url, headers=headers)
-	json_response = json.loads(response.content)
+	while True:
+		query = {'per_page':100, 'page':counter}
+		response = requests.get(url, headers=headers, params=query)
+		json_response = json.loads(response.content)
 
-	if (json_response['total'] > 0):
-		for record in json_response['data']:
-			folders[record['name']] = record['uri'][record['uri'].rindex('/')+1:len(record['uri'])]
+		if (json_response['total'] > 0):
+			for record in json_response['data']:
+				folders[record['name']] = record['uri'][record['uri'].rindex('/')+1:len(record['uri'])]
+
+		folders_counter += len(json_response['data'])
+		counter += 1
+
+		if (folders_counter >=  json_response['total']):
+			break
 
 	return folders
 
@@ -188,7 +198,6 @@ def check_upload_videos(records):
 			sleep(fibo(START_WAIT))
 			START_WAIT +=1
 			check_upload_videos(records)
-			#threading.Thread(target=check_upload_videos, args=[records]).start()
 
 	return records
 

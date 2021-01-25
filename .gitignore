@@ -1,4 +1,4 @@
 .DS_Store
 meetings/
 config.json
-records*.csv
+*.csv
