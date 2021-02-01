@@ -1,4 +1,4 @@
-#General description
+# General description
 These script has been designed to download files from a set of Zoom accounts, upload them to Vimeo and remove them from Zoom.
 Here the files included in this repo:
 * config.json
@@ -9,7 +9,7 @@ Here the files included in this repo:
 
 All of these python scripts runs by itself, except utils.py (this is an utility script) and the syntaxis is similar for all of them.
 
-##Prerequisites
+## Prerequisites
 * python 3.x
 * wget (you can get it by: `pip wget`)
 * Zoom Pro Account
@@ -17,14 +17,14 @@ All of these python scripts runs by itself, except utils.py (this is an utility 
 * Zoom Application
 * Vimeo Application
 
-##config.json
+## config.json
 This is the config file, in this you must specify this:
 * Zoom access token
 * Vimeo access token
 * Vimeo User Id
 * Vimeo Preset Id
 
-##Getting a Zoom Token
+## Getting a Zoom Token
 
 You can get your Zoom access token making a JWT Application in Zoom market place (https://marketplace.zoom.us/).
 Here you can fin the steps to create a JWT Application: https://marketplace.zoom.us/docs/guides/build/jwt-app
