@@ -64,7 +64,7 @@ class Utils:
 		csvfile = open(filename, 'r')
 		reader = csv.DictReader( csvfile, self.CSV_HEADER)
 		for index, row in enumerate(reader):
-			if index > 0 and row['FILE EXTENSION'] == 'MP4':
+			if index > 0:
 				item = {}
 				for record_name in self.CSV_HEADER:
 					item[record_name.lower().replace(' ','_')] = row[record_name]
@@ -72,7 +72,7 @@ class Utils:
 		return records
 
 	def get_zoom_files(self, users, start_date, end_date):
-		print(' Downloading meetings list '.center(100,':'))
+		print(' Getting meetings list '.center(100,':'))
 
 		url = "https://api.zoom.us/v2/users/"
 		query = {"trash_type":"meeting_recordings","mc":"false","page_size":"100"}
@@ -192,7 +192,8 @@ class Utils:
 		file_exists = os.path.isfile(filename)
 		with open(filename, 'w') as f: #'a'
 			writer = csv.writer(f)
-			if not file_exists:
-				writer.writerow(self.CSV_HEADER)
+			#if not file_exists:
+			writer.writerow(self.CSV_HEADER)
+
 			for record in fileobject:
 				writer.writerow(self.get_record_row(record))

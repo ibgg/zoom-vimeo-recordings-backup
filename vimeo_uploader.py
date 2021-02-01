@@ -28,7 +28,7 @@ def fibo(n):
 		return(fibo(n-1) + fibo(n-2))
 
 def create_vimeo_folder(foldername):
-	print('\n::::::::::::::::::::::::::::::Create Vimeo Folder {foldername}::::::::::::::::::::::::::::::'.format(foldername=foldername))
+	print('\n'+' Create Vimeo Folder {foldername} '.format(foldername=foldername).center(100,':'))
 	headers = headers = {'authorization': 'Bearer '+utils.vimeo_token}
 	url = 'https://api.vimeo.com/users/{user_id}/projects'.format(user_id=utils.vimeo_userid)
 	body = {}
@@ -48,7 +48,7 @@ def create_vimeo_folder(foldername):
 	return folder
 
 def get_vimeo_folders():
-	print('\n::::::::::::::::::::::::::::::Getting video folders::::::::::::::::::::::::::::::')
+	print('\n'+' Getting video folders '.center(100,':'))
 	headers = headers = {'authorization': 'Bearer '+utils.vimeo_token}
 	url = 'https://api.vimeo.com/users/{user_id}/projects'.format(user_id=utils.vimeo_userid)
 	folders = {}
@@ -89,7 +89,7 @@ def request_move_videos_to_folder(videos_list, record, folder_id):
 
 
 def move_videos_to_folder(records):
-	print('\n::::::::::::::::::::::::::::::moving videos to folder::::::::::::::::::::::::::::::')
+	print('\n'+' Moving videos to folder '.center(100,':'))
 
 	folders = get_vimeo_folders()
 	videos_list = {}
@@ -115,7 +115,7 @@ def move_videos_to_folder(records):
 
 
 def set_embeded_presets(record):
-	print('\n::::::::::::::::::::::::::::::Setting embedded settings::::::::::::::::::::::::::::::')
+	print('\n'+' Setting embedded settings '.center(100,':'))
 	headers = headers = {'authorization': 'Bearer '+utils.vimeo_token}
 	url = 'https://api.vimeo.com/videos/{video_id}/presets/{preset_id}'.format(video_id=record['vimeo_id'], preset_id=utils.vimeo_preset_id)
 
@@ -127,7 +127,7 @@ def set_embeded_presets(record):
 
 
 def check_upload_videos(records, filename):
-	print('\n::::::::::::::::::::::::::::::Checking video status from Vimeo::::::::::::::::::::::::::::::')
+	print('\n'+' Checking video status from Vimeo '.center(100,':'))
 	global START_WAIT
 	unavailablecount = 0
 	headers = headers = {'authorization': 'Bearer '+utils.vimeo_token}
@@ -143,7 +143,7 @@ def check_upload_videos(records, filename):
 			if record['file_extension'] == 'MP4':
 				if record['vimeo_status']!='available' and record['vimeo_status']!='error' and record['vimeo_uri'] !='':
 					url = "https://api.vimeo.com/me/"+record['vimeo_uri']
-					print('\n::::::::::::::::::::::::::::::checking %s::::::::::::::::::::::::::::::'%record['file_name'])
+					print('\n'+' Checking {filename} '.format(filename=record['file_name']).center(100,':'))
 					response = requests.get(url, headers=headers)
 					json_response = json.loads(response.text)
 
@@ -177,14 +177,14 @@ def check_upload_videos(records, filename):
 	return records
 
 def upload_zoom_videos(records):
-	print('\n::::::::::::::::::::::::::::::Backup video files from zoom::::::::::::::::::::::::::::::')
+	print('\n'+' Backup video files from Zoom '.center(100,':'))
 	url = "https://api.vimeo.com/me/videos"
 	headers = headers = {'authorization': 'Bearer '+utils.vimeo_token}
 
 	for record in records:
 		if record['file_extension'] == 'MP4':
 			if record['vimeo_status'] != 'available' and record['vimeo_status'] != 'transcoding' and record['vimeo_status'] != 'transcode_starting':
-				print('\n::::::::::::::::::::::::::::::uploading %s::::::::::::::::::::::::::::::'%record['file_name'])
+				print('\n'+' Uploading {filename} '.format(filename=record['file_name']).center(100,':'))
 				body = {}
 				body['name']=record['file_name']
 				body['description']=VIDEO_DESCRIPTION.format(topic=record['topic'],start_date=record['recording_start'])
@@ -213,7 +213,7 @@ def upload_zoom_videos(records):
 					record['vimeo_transcode_status'] = json_response['transcode']['status']
 					record['vimeo_id']= record['vimeo_uri'][8:len(record['vimeo_uri'])]
 			else:
-				print('\n::::::::::::::::::::::::::::::record %s already or almost uploaded!::::::::::::::::::::::::::::::'%record['file_name'])
+				print('\n'+'Record {filename} already or almost uploaded! '.format(filename=record['file_name']))
 
 	return records
 
@@ -221,9 +221,11 @@ if __name__ == "__main__":
 	utils = Utils()
 	files = utils.get_records(sys.argv, 'vimeo_uploader.py')
 
-	# if utils.input_type == 1:
-	# 	files = check_upload_videos(files, utils.input_file)
-	#
-	# files = upload_zoom_videos(files)
-	# files = check_upload_videos(files, utils.output_file)
-	# move_videos_to_folder(files)
+	if utils.input_type == 1:
+		files = check_upload_videos(files, utils.input_file)
+
+	files = upload_zoom_videos(files)
+	files = check_upload_videos(files, utils.output_file)
+	move_videos_to_folder(files)
+
+	print(' Script finished! '.center(100,':'))

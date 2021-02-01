@@ -12,39 +12,23 @@ from utils import Utils
 
 def download_zoom_files(records_list, filename):
 	print('\n'+' Downloading meetings files '.center(100,':')+'\n')
-	file_exists = os.path.isfile(filename)
 
-	if not os.path.exists('./reports'):
-		os.makedirs('./reports')
+	for index, record in enumerate(records_list):
+		print(record['file_path']+record['file_name'])
 
-	with open(filename, 'w') as f:
-		writer = csv.writer(f)
-
-		if not file_exists:
-			writer.writerow(utils.CSV_HEADER)
-
-		for index, record in enumerate(records_list):
-			if not os.path.exists(str(record['file_path'])):
-				os.makedirs(str(record['file_path']))
-
-			print(record['file_path']+record['file_name'])
-
-			if (path.exists(record['file_path']+record['file_name'])):
-				print(' File already downloaded! '.center(100,':')+'\n')
-				record["status"]="downloaded"
-				writer.writerow(utils.get_record_row(record))
-				continue
-			try:
-				print('Lets download: {download_url}'.format(download_url=str(record['download_url'])))
-				wget.download(str(record['download_url']),str(record['file_path']+record['file_name']))
-				record["status"]="downloaded"
-				writer.writerow(utils.get_record_row(record))
-			except Exception as e:
-				print(e)
-				if record["status"] != "downloaded":
-					record["status"]="listed"
-					writer.writerow(utils.get_record_row(record))
-			print('\n')
+		if (path.exists(record['file_path']+record['file_name'])):
+			print(' File already downloaded! '.center(100,':')+'\n')
+			record["status"]="downloaded"
+			continue
+		try:
+			print('Lets download: {download_url}'.format(download_url=str(record['download_url'])))
+			wget.download(str(record['download_url']),str(record['file_path']+record['file_name']))
+			record["status"]="downloaded"
+		except Exception as e:
+			print('Exception '+e)
+			if record["status"] != "downloaded":
+				record["status"]="listed"
+		print('\n')
 	return records_list
 
 if __name__ == "__main__":
