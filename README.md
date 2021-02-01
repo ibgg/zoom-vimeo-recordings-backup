@@ -1,5 +1,40 @@
-# zoom-vimeo-recordings-backup
-This script downloads records from Zoom and push them into a Vimeo account
+#General description
+These script has been designed to download files from a set of Zoom accounts, upload them to Vimeo and remove them from Zoom.
+Here the files included in this repo:
+* config.json
+* utils.py
+* vimeo_uploader.py
+* zoom_files_downloader.py
+* zoom_files_delete.py
+
+All of these python scripts runs by itself, except utils.py (this is an utility script) and the syntaxis is similar for all of them.
+
+##Prerequisites
+* python 3.x
+* wget (you can get it by: `pip wget`)
+* Zoom Pro Account
+* Vimeo Pro Account
+* Zoom Application
+* Vimeo Application
+
+##config.json
+This is the config file, in this you must specify this:
+* Zoom access token
+* Vimeo access token
+* Vimeo User Id
+* Vimeo Preset Id
+
+##Getting a Zoom Token
+
+You can get your Zoom access token making a JWT Application in Zoom market place (https://marketplace.zoom.us/).
+Here you can fin the steps to create a JWT Application: https://marketplace.zoom.us/docs/guides/build/jwt-app
+After you create the application, you must copy the JWT Token to your config.json file.
+
+## Getting a Vimeo token
+
+
+## zoom_files_downloader
+This script
 
 The config file needs these fields:
 * Zoom access token

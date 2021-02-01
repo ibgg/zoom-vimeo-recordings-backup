@@ -221,9 +221,9 @@ if __name__ == "__main__":
 	utils = Utils()
 	files = utils.get_records(sys.argv, 'vimeo_uploader.py')
 
-	if utils.input_type == 1:
-		files = check_upload_videos(files, utils.input_file)
-
-	files = upload_zoom_videos(files)
-	files = check_upload_videos(files, utils.output_file)
-	move_videos_to_folder(files)
+	# if utils.input_type == 1:
+	# 	files = check_upload_videos(files, utils.input_file)
+	#
+	# files = upload_zoom_videos(files)
+	# files = check_upload_videos(files, utils.output_file)
+	# move_videos_to_folder(files)

@@ -48,7 +48,7 @@ class Utils:
 		return self.files
 
 	def get_zoom_users(self):
-		print('::::::::::::::::::::::::::::::Fetching user ids::::::::::::::::::::::::::::::')
+		print(' Fetching user ids '.center(100,':'))
 
 		url = "https://api.zoom.us/v2/users"
 		query = {"page_size":"30","status":"active"}
@@ -59,7 +59,7 @@ class Utils:
 		return users
 
 	def load_videos_data(self, filename):
-		print('\n::::::::::::::::::::::::::::::Loading meetings files::::::::::::::::::::::::::::::')
+		print(' Loading meetings files'.center(100,':'))
 		records = []
 		csvfile = open(filename, 'r')
 		reader = csv.DictReader( csvfile, self.CSV_HEADER)
@@ -72,7 +72,7 @@ class Utils:
 		return records
 
 	def get_zoom_files(self, users, start_date, end_date):
-		print('\n::::::::::::::::::::::::::::::Downloading meetings list::::::::::::::::::::::::::::::')
+		print(' Downloading meetings list '.center(100,':'))
 
 		url = "https://api.zoom.us/v2/users/"
 		query = {"trash_type":"meeting_recordings","mc":"false","page_size":"100"}
@@ -89,12 +89,13 @@ class Utils:
 			if to_date > end_date:
 				to_date = end_date
 
-			print('\n::::::::::::::::::::::::::::::'+user['email']+'::::::::::::::::::::::::::::::')
+			print('\n'+user['email'].center(100,':'))
 			while to_date < end_date+timedelta(days=1):
 				query["from"] = str(from_date)
 				query["to"] = str(to_date)
 
-				print(':::::::::::::::::::::::::::::: ['+str(from_date)+'] - ['+str(to_date)+'] ::::::::::::::::::::::::::::::')
+				print(' [{start_date}] - [{end_date}] '.format(start_date=start_date, end_date=end_date).center(100,':'))
+				# print(' ['+str(from_date)+'] - ['+str(to_date)+'] ')
 
 				response = requests.request("GET", _url, headers=headers, params=query)
 				json_response = json.loads(response.content)
@@ -182,8 +183,8 @@ class Utils:
 			row.append(record[record_name.lower().replace(' ','_')])
 		return row
 
-	def save_csv(sef, fileobject, filename):
-		print('\n::::::::::::::::::::::::::::::Saving downloaded report ' + filename +'::::::::::::::::::::::::::::::')
+	def save_csv(self, fileobject, filename):
+		print('\n'+' Saving report {filename} '.format(filename=filename).center(100,':'))
 
 		if not os.path.exists('./reports'):
 			os.makedirs(str('./reports'))
@@ -194,4 +195,4 @@ class Utils:
 			if not file_exists:
 				writer.writerow(self.CSV_HEADER)
 			for record in fileobject:
-				writer.writerow(get_record_row(record))
+				writer.writerow(self.get_record_row(record))
