@@ -186,8 +186,8 @@ class Utils:
 	def save_csv(self, fileobject, filename):
 		print('\n'+' Saving report {filename} '.format(filename=filename).center(100,':'))
 
-		if not os.path.exists('./reports'):
-			os.makedirs(str('./reports'))
+		# if not os.path.exists('./reports'):
+		# 	os.makedirs(str('./reports'))
 
 		file_exists = os.path.isfile(filename)
 		with open(filename, 'w') as f: #'a'
