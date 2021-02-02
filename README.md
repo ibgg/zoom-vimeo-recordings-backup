@@ -61,3 +61,5 @@ This mode gets files from Zoom accounts and saves them in local storage.
 You can see this behavior in this diagram:
 
 ![Download files using an input file](diagrams/download_zoom.jpg?raw=true "Download files using an input file")
+
+## Uploading files with vimeo_uploader
