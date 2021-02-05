@@ -1,5 +1,5 @@
 # General description
-These script has been designed to download files from a set of Zoom accounts, upload them to Vimeo and remove them from Zoom.
+These scripts has been designed to download files from a set of Zoom accounts, upload them to Vimeo and remove them from Zoom.
 Here the files included in this repo:
 * config.json
 * utils.py
