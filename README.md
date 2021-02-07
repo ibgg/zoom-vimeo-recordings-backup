@@ -63,3 +63,4 @@ You can see this behavior in this diagram:
 ![Download files using an input file](diagrams/download_zoom.jpg?raw=true "Download files using an input file")
 
 ## Uploading files with vimeo_uploader
+This script upload video files from Zoom accounts to Vimeo organizing these in folders and setting preset

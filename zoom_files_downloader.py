@@ -14,6 +14,9 @@ def download_zoom_files(records_list, filename):
 	print('\n'+' Downloading meetings files '.center(100,':')+'\n')
 
 	for index, record in enumerate(records_list):
+		if not os.path.exists(str(record['file_path'])):
+			os.makedirs(str(record['file_path']))
+
 		print(record['file_path']+record['file_name'])
 
 		if (path.exists(record['file_path']+record['file_name'])):
