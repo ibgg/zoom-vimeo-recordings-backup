@@ -95,3 +95,5 @@ In this approach the script receives an input file, then all these files are mov
 `python zoom_files_delete.py --daterange YYYY-mm-dd YYYY-mm-dd  --outputfile outputfile.csv`
 
 In this approach, files between two dates are moved to trash, then a report is generated.
+
+`python vimeo_uploader.py --daterange 2020-01-01 2020-05-03  --outputfile outputfile.csv`
