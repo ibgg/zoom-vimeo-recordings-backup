@@ -84,4 +84,5 @@ This script lets you delete files from a set of Zoom accounts using an input fil
 
 ### Using file input mode
 ![Delete files using date range](diagrams/delete_files.jpg?raw=true "Delete videos using an input file")
+
 `python zoom_files_delete.py --inputfile inputfile.csv  --outputfile outputfile.csv`
