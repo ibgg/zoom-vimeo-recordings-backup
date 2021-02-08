@@ -18,7 +18,7 @@ All of these python scripts runs by itself, except utils.py (this is an utility 
 * Vimeo Application
 
 ### config.json
-You must specify the following information in ths file:
+You must specify the following information in this file:
 * **Zoom access token**
 * **Vimeo access token**
 * **Vimeo User Id**
@@ -97,3 +97,14 @@ In this approach the script receives an input file, then all these files are mov
 In this approach, files between two dates are moved to trash, then a report is generated.
 
 `python vimeo_uploader.py --daterange 2020-01-01 2020-05-03  --outputfile outputfile.csv`
+
+## Official documentation
+* https://marketplace.zoom.us/docs/guides
+* https://marketplace.zoom.us/docs/api-reference/introduction
+* https://marketplace.zoom.us/docs/api-reference/zoom-api/users/users
+* https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/meetings
+* https://marketplace.zoom.us/docs/api-reference/zoom-api/cloud-recording/recordingdelete
+* https://developer.vimeo.com/api/guides/start
+* https://developer.vimeo.com/api/reference/folders
+* https://developer.vimeo.com/api/reference/videos#uploads
+* https://developer.vimeo.com/api/reference/embed-presets
