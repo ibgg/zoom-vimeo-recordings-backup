@@ -78,3 +78,10 @@ Finally a report is generated and this can be used to start the script again wit
 You can upload videos from Zoom between two dates. i.e.
 
 `python vimeo_uploader.py --daterange 2020-01-01 2020-05-03  --outputfile outputfile.csv`
+
+## Delete files from Zoom: zoom_files_delete
+This script lets you delete files from a set of Zoom accounts using an input file. This file can be generated from with vimeo_uploader.py or zoom_files_downloader.py, so you can delete a set of files after performs a backup in your computer or your Vimeo account.
+
+### Using file input mode
+![Delete files using date range](diagrams/delete_files.jpg?raw=true "Delete videos using an input file")
+`python zoom_files_delete.py --inputfile inputfile.csv  --outputfile outputfile.csv`
