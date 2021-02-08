@@ -59,6 +59,22 @@ You can download files between two dates. i.e.
 This mode gets files from Zoom accounts and saves them in local storage.
 
 ## Uploading videos to Vimeo: vimeo_uploader
-This script uploads video files from Zoom accounts to a Vimeo account, then it organizes these videos in folders and finally, setup a defined preset.
+This script uploads video files from Zoom accounts to a Vimeo account, then it organizes these videos in folders (with the same name as the meeting)  and finally, setup a defined preset.
 
+### Using file input mode
+![Upload files using an input file](diagrams/upload_files.jpg?raw=true "Upload videos using an input file")
 
+`python vimeo_uploader.py --inputfile inputfile.csv  --outputfile outputfile.csv`
+
+This approach receives an input file, and before upload the videos, it checks for the videos in Vimeo, if these exist, it does not upload them again, but if one of these file does not exist in the Vimeo account, this script upload the video, then check if the video has started the transcription. When Vime starts the transcription, these are moved and set the preset.
+
+Finally a report is generated and this can be used to start the script again with the same videos.
+
+### Using date range mode
+![Upload files using date range](diagrams/upload_zoom.jpg?raw=true "Upload videos using an input file")
+
+`python zoom_files_downloader.py --daterange YYYY-mm-dd YYYY-mm-dd  --outputfile outputfile.csv`
+
+You can upload videos from Zoom between two dates. i.e.
+
+`python vimeo_uploader.py --daterange 2020-01-01 2020-05-03  --outputfile outputfile.csv`
